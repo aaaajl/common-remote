@@ -1,5 +1,11 @@
 package com.yihaodian.architecture.remote.example.test.service;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,17 +35,28 @@ public class ExampleClientTest extends AbstractServiceTest {
 
 	@Test
 	public void TestDataSize() throws Exception {
-		// AtomicInteger count=new AtomicInteger(0);
-		for (int i = 0; i < 50000; i++) {
-			exampleClient.testDataService(DataCreator.createObject(2));
+		AtomicInteger count = new AtomicInteger(0);
+		for (int i = 0; i < 10000; i++) {
+			exampleClient.testDataService(DataCreator.createObject(1));
 			System.out.println(i);
 		}
-		Long curr = System.currentTimeMillis();
+		ExecutorService es = new ThreadPoolExecutor(40, 40, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(50000));
+		final AtomicInteger ai = new AtomicInteger(0);
+		final Long curr = System.currentTimeMillis();
 		for (int i = 0; i < 50000; i++) {
-			String a = exampleClient.testDataService(DataCreator.createObject(2));
-			System.out.println(i);
+			es.execute(new Runnable() {
+
+				public void run() {
+					String a = exampleClient.testDataService(DataCreator.createObject(1));
+					if (ai.incrementAndGet() == 10000) {
+						System.out.println("10K request cost:" + (System.currentTimeMillis() - curr));
+					}
+					if (ai.incrementAndGet() >= 50000) {
+						System.out.println("50K request cost:" + (System.currentTimeMillis() - curr));
+					}
+				}
+			});
 		}
-		System.out.println(System.currentTimeMillis() - curr);
 		Thread.sleep(1000000);
 	}
 

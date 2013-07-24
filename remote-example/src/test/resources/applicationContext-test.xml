@@ -10,7 +10,7 @@
 	<property name="serviceName" value="exampleService"></property>
 	<property name="interfaceClass" value="com.yihaodian.architecture.remote.example.service.ExampleService"></property>
 	<property name="callMode" value="sync"></property>
-	<property name="timeout" value="2000"/>
-	<property name="hosts" value="192.168.92.72:2552"></property>
+	<property name="timeout" value="20000"/>
+	<property name="hosts" value="192.168.92.63:2552"></property>
 	</bean>
 </beans>
